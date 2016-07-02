@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// ToxGPU.as
+// Tox[N]andGPU.as
 // Tox[N]andGPU, a simple NandOS GPU handler
 // Created by Marc "Toxicat" Guilmard
 // -----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ class GPUHandler {
 	void PowerOff() {
 		if (!_open)
 			return;
-
+	
 		vector<var> cmd = { Control_Device_Power, Device_PowerMode_Off };
 		write(_fd, cmd);
 		sleep(1);
@@ -48,18 +48,20 @@ class GPUHandler {
 	void PowerOff(int display) {
 		if (!_open)
 			return;
-		
+	
 		vector<var> cmd = { Control_Device_Power, Device_PowerMode_Off, display };
 		write(_fd, cmd);
+		sleep(1);
 	}
 	
 	void PowerOff(vector<int> &displays) {
 		if (!_open)
 			return;
-		
+	
 		for(uint i = 0; i < displays.size(); ++i) {
 			PowerOff(displays[i]);
 		}
+		sleep(1);
 	}
 	
 	/*
@@ -68,30 +70,38 @@ class GPUHandler {
 	** ==========
 	*/
 	
-	void PowerOn() {
+	void PowerOn(bool wait = true) {
 		if (!_open)
 			return;
-		
+	
 		vector<var> cmd = { Control_Device_Power, Device_PowerMode_On };
 		write(_fd, cmd);
-		sleep(1);
+	
+		if (wait)
+			sleep(1);
 	}
 	
-	void PowerOn(int display) {
+	void PowerOn(int display, bool wait = true) {
 		if (!_open)
 			return;
-		
+	
 		vector<var> cmd = { Control_Device_Power, Device_PowerMode_On, display };
 		write(_fd, cmd);
+	
+		if (wait)
+			sleep(1);
 	}
 	
-	void PowerOn(vector<int> &displays) {
+	void PowerOn(vector<int> &displays, bool wait = true) {
 		if (!_open)
 			return;
-		
+	
 		for(uint i = 0; i < displays.size(); ++i) {
-			PowerOn(displays[i]);
+			PowerOn(displays[i], false);
 		}
+	
+		if (wait)
+			sleep(1);
 	}
 	
 	/*
@@ -103,7 +113,7 @@ class GPUHandler {
 	void SetDisplayMod(int display, var mode) {
 		if (!_open)
 			return;
-		
+	
 		vector<var> cmd = { Control_Video_DisplayMode, display, mode };
 		write(_fd, cmd);
 	}
@@ -120,7 +130,7 @@ class GPUHandler {
 	void SetDisplayMod(vector<int> &displays, var mode) {
 		if (!_open)
 			return;
-		
+	
 		for(uint i = 0; i < displays.size(); ++i) {
 			SetDisplayMod(displays[i], mode);
 		}
@@ -135,7 +145,7 @@ class GPUHandler {
 	void ColorClear(int display, var color) {
 		if (!_open)
 			return;
-		
+	
 		vector<var> cmd = { Control_Video_Clear, display, color };
 		write(_fd, cmd);
 	}
@@ -143,7 +153,7 @@ class GPUHandler {
 	void ColorClear(var color) {
 		if (!_open)
 			return;
-		
+	
 		for(uint i = 0; i <= 7; ++i) {
 			ColorClear(i, color);
 		}
@@ -152,7 +162,7 @@ class GPUHandler {
 	void ColorClear(vector<int> &displays, var color) {
 		if (!_open)
 			return;
-		
+	
 		for(uint i = 0; i < displays.size(); ++i) {
 			ColorClear(displays[i], color);
 		}
@@ -167,6 +177,7 @@ class GPUHandler {
 	void CharacterClear(int display) {
 		if (!_open)
 			return;
+	
 		vector<var> cmd = { Control_Video_ClearCharacters, display };
 		write(_fd, cmd);
 	}
@@ -191,11 +202,86 @@ class GPUHandler {
 	
 	/*
 	** ==========
+	** AppendText functions
+	** ==========
+	*/
+	
+	void AppendText(int display, string text, var foregroundColor = Display_TextForeground_Default, var backgroundColor = Display_TextBackground_Default, var textAttribute = Display_TextAttribute_Normal, bool newLine = false) {
+		if (!_open)
+			return;
+	
+		vector<var> cmd = { Control_Video_AppendCharacters, display, text, foregroundColor, backgroundColor, textAttribute };
+		write(_fd, cmd);
+	
+		if (newLine) {
+			NewLine(display);
+		}
+	}
+	
+	void AppendText(string text, var foregroundColor = Display_TextForeground_Default, var backgroundColor = Display_TextBackground_Default, var textAttribute = Display_TextAttribute_Normal, bool newLine = false) {
+		if (!_open)
+			return;
+	
+		for(uint i = 0; i <= 7; ++i) {
+			AppendText(i, text, foregroundColor, backgroundColor, textAttribute, false);
+		}
+		
+		if (newLine) {
+			NewLine();
+		}
+	}
+	
+	void AppendText(vector<int> &displays, string text, var foregroundColor = Display_TextForeground_Default, var backgroundColor = Display_TextBackground_Default, var textAttribute = Display_TextAttribute_Normal, bool newLine = false) {
+		if (!_open)
+			return;
+	
+		for(uint i = 0; i < displays.size(); ++i) {
+			AppendText(displays[i], text, foregroundColor, backgroundColor, textAttribute, false);
+		}
+		
+		if (newLine)
+			NewLine(displays);
+	}
+	
+	/*
+	** ==========
+	** NewLine functions
+	** ==========
+	*/
+	
+	void NewLine(int display) {
+		if (!_open)
+			return;
+	
+		vector<var> cmd = { Control_Video_Newline, display };
+		write(_fd, cmd);
+	}
+	
+	void NewLine() {
+		if (!_open)
+			return;
+	
+		for(uint i = 0; i <= 7; ++i) {
+			NewLine(i);
+		}
+	}
+	
+	void NewLine(vector<int> &displays) {
+		if (!_open)
+			return;
+	
+		for(uint i = 0; i < displays.size(); ++i) {
+			NewLine(displays[i]);
+		}
+	}
+	
+	/*
+	** ==========
 	** AnimationFunction functions
 	** ==========
 	*/
 	
-	void ColorBlink(int display, var baseColor, var blinkColor, int delay, uint nb) {		
+	void ColorBlink(int display, var baseColor, var blinkColor, int delay, uint nb) {
 		if (!_open)
 			return;
 		

@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------------
+// blink.as
+// Blue blink all screens
+// Created by Marc "Toxicat" Guilmard
+// -----------------------------------------------------------------------------
+
 int main(uint argc, vector<var> &in argv) {
 	
 	GPUHandler myGPU;
@@ -21,6 +27,9 @@ int main(uint argc, vector<var> &in argv) {
 	vector<int> cargoPanels = {5, 6};
 	myGPU.PowerOn(cargoPanels);
 	myGPU.ColorBlink(cargoPanels, Display_TextBackground_Black, Display_TextBackground_LightBlue, 250000, 3);
+	
+	myGPU.PowerOn(0);
+	myGPU.ColorBlink(0, Display_TextBackground_Black, Display_TextBackground_LightBlue, 250000, 3);
 	
 	myGPU.Close();
 	return 0;
