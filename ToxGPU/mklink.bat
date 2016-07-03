@@ -1,5 +1,5 @@
-@del main.as
+@rm -f hello_world.lnk
 
 @set arg1=%userprofile%\AppData\Roaming\3001SQ\simulation\applications\hello_world.as
 
-@mklink main.as %arg1%
+@mklink hello_world.lnk %arg1%

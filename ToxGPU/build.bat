@@ -1,3 +1,3 @@
-@echo | cat Tox[N]andGPU.as > main.as
+@echo | cat Tox[N]andGPU.as > hello_world.lnk
 
-@echo | cat %1 >> main.as
+@echo | cat %1 >> hello_world.lnk
